@@ -22,7 +22,7 @@ ffmpeg-python==0.2.0
 sox==1.5.0
 soundfile==0.13.1
 librosa==1.0.0
-numpy==2.3.5
+numpy==2.5.2
 diffusers==0.37.0
 omegaconf==2.3.1
 modelscope==1.39.1
