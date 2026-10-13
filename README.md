@@ -14,7 +14,9 @@ or the upstream training environment.
 Native Linux ARM64 and AMD64 builds use GitHub-hosted runners, without QEMU.
 Every build runs real vLLM/Step/FunASR/CosyVoice imports and model-free FastAPI
 health, multipart validation, mocked synthesis, and 24 kHz WAV checks, with
-network disabled. These are **CPU checks, not GPU inference tests**.
+network disabled. Required FunASR registry components, Step1 architecture
+support, and the KV/Triton/Transformers compatibility wrappers are also checked.
+These are **CPU checks, not GPU inference tests**.
 
 The dependency baseline was inspected from the existing GB10 ARM64 image:
 vLLM 0.31.0, PyTorch 2.13.0+cu130, torchaudio 2.11.0+cu130, Transformers 5.12.1,

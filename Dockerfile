@@ -39,7 +39,7 @@ LABEL org.opencontainers.image.source="https://github.com/UnitVectorY-Labs/docke
 # Ubuntu's CUDA base already contains UID 1000. Reuse it without assuming its name.
 RUN if ! getent group 1000 >/dev/null; then groupadd --gid 1000 step; fi \
     && if ! getent passwd 1000 >/dev/null; then useradd --uid 1000 --gid 1000 --home-dir /home/step step; fi \
-    && install -d -o 1000 -g 1000 /home/step/.cache /model /tokenizer
+    && install -d -o 1000 -g 1000 /home/step /home/step/.cache /model /tokenizer
 COPY --from=build /opt/venv /opt/venv
 COPY --from=build /opt/step-audio-editx /opt/step-audio-editx
 WORKDIR /opt/step-audio-editx
