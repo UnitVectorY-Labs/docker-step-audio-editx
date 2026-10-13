@@ -10,6 +10,10 @@ updates:
       time: "06:00"
       timezone: "America/New_York"
     open-pull-requests-limit: 20
+    groups:
+      inference-stack:
+        patterns:
+          - '*'
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
