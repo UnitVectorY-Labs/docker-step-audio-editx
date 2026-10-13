@@ -3,7 +3,7 @@
 --extra-index-url https://flashinfer.ai/whl
 vllm==0.31.0
 torch==2.13.0
-torchaudio==2.11.0
+torchaudio==2.11.0+cu130
 torchvision==0.28.0
 torchcodec==0.17.0
 transformers==5.12.1
