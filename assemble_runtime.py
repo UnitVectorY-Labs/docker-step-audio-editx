@@ -55,10 +55,12 @@ def dependencies(path):
 copy("/usr/lib/python3.12")
 copy("/usr/include")
 copy("/usr/lib/gcc")
+copy("/usr/libexec/gcc")  # Ubuntu 24.04 keeps cc1/cc1plus here, not under lib.
 copy("/usr/share/sox")
 for pattern in ["/usr/lib/*/libpython3.12.so*", "/usr/lib/*/libsox.so*",
                 "/usr/lib/*/sox", "/usr/lib/*/libgomp.so*", "/usr/lib/*/libgcc_s.so",
-                "/usr/lib/*/libstdc++.so", "/usr/lib/*/crt*.o"]:
+                "/usr/lib/*/libstdc++.so", "/usr/lib/*/crt*.o",
+                "/usr/lib/*/libOpenCL.so*"]:
     for path in glob.glob(pattern):
         copy(path)
 
@@ -78,7 +80,7 @@ copy("/bin/sh")  # Ninja/CUDA extension fallback invokes /bin/sh, not Bash.
 # The standalone interpreter was copied above; preserve its public alias too.
 (ROOT / "usr/bin/python3").symlink_to("python3.12")
 
-for tree in ["/usr/lib/python3.12", "/usr/lib/gcc", "/opt/venv"]:
+for tree in ["/usr/lib/python3.12", "/usr/lib/gcc", "/usr/libexec/gcc", "/opt/venv"]:
     for path in Path(tree).rglob("*"):
         if path.is_file() and (".so" in path.name or os.access(path, os.X_OK)):
             dependencies(path)
