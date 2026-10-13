@@ -7,7 +7,7 @@ torchaudio==2.11.0
 torchvision==0.28.0
 torchcodec==0.17.0
 transformers==5.12.1
-flashinfer-python==0.7.0.post1
+flashinfer-python==0.7.1
 flashinfer-cubin==0.7.0.post1
 funasr==1.4.16
 onnxruntime-gpu==1.31.0
