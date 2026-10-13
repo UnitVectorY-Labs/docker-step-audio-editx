@@ -2,7 +2,7 @@
 --extra-index-url https://download.pytorch.org/whl/cu130
 --extra-index-url https://flashinfer.ai/whl
 vllm==0.31.0
-torch==2.13.0
+torch==2.14.1+cu130
 torchaudio==2.11.0
 torchvision==0.28.0
 torchcodec==0.17.0
