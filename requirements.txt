@@ -4,7 +4,7 @@
 vllm==0.31.0
 torch==2.13.0
 torchaudio==2.11.0
-torchvision==0.28.0
+torchvision==0.29.1+cu130
 torchcodec==0.17.0
 transformers==5.12.1
 flashinfer-python==0.7.0.post1
