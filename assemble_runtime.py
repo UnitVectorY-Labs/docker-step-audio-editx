@@ -22,8 +22,12 @@ def copy(path):
     if not src.exists() or core.match(src.name):
         return
     destination = str(src)
-    if destination.startswith("/lib/"):
-        destination = "/usr" + destination
+    # Google Debian 13 is merged-/usr. Copying real top-level directories over
+    # its /bin, /sbin, /lib or /lib64 symlinks fails before tests can execute.
+    for prefix in ("/bin/", "/sbin/", "/lib/", "/lib64/"):
+        if destination.startswith(prefix):
+            destination = "/usr" + destination
+            break
     dst = ROOT / destination.lstrip("/")
     dst.parent.mkdir(parents=True, exist_ok=True)
     if src.is_dir():
