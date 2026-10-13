@@ -1,0 +1,33 @@
+# CUDA 13 wheels; vLLM's published default wheel is CUDA 13 on both platforms.
+--extra-index-url https://download.pytorch.org/whl/cu130
+--extra-index-url https://flashinfer.ai/whl
+vllm==0.31.0
+torch==2.13.0
+torchaudio==2.11.0
+torchvision==0.28.0
+torchcodec==0.17.0
+transformers==5.12.1
+flashinfer-python==0.7.0.post1
+flashinfer-cubin==0.7.0.post1
+funasr==1.4.16
+onnxruntime-gpu==1.31.0
+openai-whisper==20250625
+HyperPyYAML==1.2.3
+humanfriendly==10.0
+scipy==1.18.0
+conformer==0.3.2
+rotary-embedding-torch==0.9.1
+torch-complex==0.4.4
+ffmpeg-python==0.2.0
+sox==1.5.0
+soundfile==0.13.1
+librosa==1.0.0
+numpy==2.3.5
+diffusers==0.37.0
+omegaconf==2.3.1
+modelscope==1.39.1
+einops==0.8.2
+fastapi==0.136.3
+uvicorn==0.52.3
+python-multipart==0.0.32
+httpx==0.28.1

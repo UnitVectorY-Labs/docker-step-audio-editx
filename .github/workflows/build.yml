@@ -1,0 +1,94 @@
+name: Build CUDA runtime
+on:
+  push:
+    branches: [main]
+    paths: ['Dockerfile', '.dockerignore', '*.py', 'requirements*.txt', '.github/workflows/build.yml']
+  pull_request:
+    paths: ['Dockerfile', '.dockerignore', '*.py', 'requirements*.txt', '.github/workflows/build.yml']
+  schedule:
+    - cron: '0 2 * * 6'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: cuda-runtime-${{ github.event_name == 'pull_request' && github.ref || 'publish' }}
+  cancel-in-progress: false
+env:
+  IMAGE: ghcr.io/unitvectory-labs/docker-step-audio-editx
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+          - arch: amd64
+            runner: ubuntu-24.04
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 90
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069
+      - uses: docker/login-action@783ae9cac559640a24c9212dfa6cd9e998252f9a
+        if: github.event_name != 'pull_request'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build, CPU-check and publish native platform
+        id: build
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc
+        with:
+          context: .
+          platforms: linux/${{ matrix.arch }}
+          pull: true
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.IMAGE }}:run-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.arch }}
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+          provenance: mode=max
+          sbom: true
+      - name: Record platform digest
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+          ARCH: ${{ matrix.arch }}
+        run: echo "$ARCH $DIGEST" >> "$GITHUB_STEP_SUMMARY"
+  publish:
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069
+      - uses: docker/login-action@783ae9cac559640a24c9212dfa6cd9e998252f9a
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish manifest after both platforms pass
+        env:
+          SHA: ${{ github.sha }}
+          RUN_ID: ${{ github.run_id }}
+          ATTEMPT: ${{ github.run_attempt }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          immutable="sha-${SHA}-run-${RUN_ID}-${ATTEMPT}"
+          docker buildx imagetools create \
+            --tag "$IMAGE:current" --tag "$IMAGE:$immutable" \
+            "$IMAGE:run-${RUN_ID}-${ATTEMPT}-arm64" \
+            "$IMAGE:run-${RUN_ID}-${ATTEMPT}-amd64"
+          # Never silently replace an existing source-SHA tag on a rebuild.
+          if ! docker buildx imagetools inspect "$IMAGE:sha-${SHA}" >/dev/null 2>&1; then
+            docker buildx imagetools create --tag "$IMAGE:sha-${SHA}" "$IMAGE:$immutable"
+          fi
+          docker buildx imagetools inspect "$IMAGE:current" >> "$GITHUB_STEP_SUMMARY"
