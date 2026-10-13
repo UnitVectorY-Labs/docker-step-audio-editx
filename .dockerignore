@@ -4,3 +4,5 @@
 !server.py
 !entrypoint.py
 !smoke_test.py
+!assemble_runtime.py
+!check_dependencies.py

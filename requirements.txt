@@ -2,10 +2,10 @@
 --extra-index-url https://download.pytorch.org/whl/cu130
 --extra-index-url https://flashinfer.ai/whl
 vllm==0.31.0
-torch==2.13.0
-torchaudio==2.11.0
-torchvision==0.28.0
-torchcodec==0.17.0
+torch==2.13.0+cu130
+torchaudio==2.11.0+cu130
+torchvision==0.28.0+cu130
+torchcodec==0.17.0+cu130
 transformers==5.12.1
 flashinfer-python==0.7.0.post1
 flashinfer-cubin==0.7.0.post1
@@ -22,7 +22,7 @@ ffmpeg-python==0.2.0
 sox==1.5.0
 soundfile==0.13.1
 librosa==1.0.0
-numpy==2.3.5
+numpy==2.4.6
 diffusers==0.38.0
 omegaconf==2.3.1
 modelscope==1.39.1
@@ -31,3 +31,8 @@ fastapi==0.136.3
 uvicorn==0.52.3
 python-multipart==0.0.32
 httpx==0.28.1
+# Runtime extension compiler matches the observed CUDA 13 stack, independent
+# of the builder image's CUDA version. Torch supplies CUDA 13.0 math libraries.
+nvidia-cuda-nvcc==13.3.73
+nvidia-cuda-crt==13.3.73
+nvidia-nvvm==13.3.73

@@ -1,12 +1,16 @@
 """Real imports plus model-free API checks; deliberately does not run lifespan."""
 import io
 import os
+from pathlib import Path
+import subprocess
+import tempfile
 from types import SimpleNamespace
 
 import numpy as np
 import onnxruntime
 import soundfile as sf
 import torch
+import torchaudio
 from fastapi.testclient import TestClient
 
 import server
@@ -39,6 +43,19 @@ assert response.status_code == 200, response.text
 assert response.headers["content-type"] == "audio/wav"
 audio, rate = sf.read(io.BytesIO(response.content))
 assert rate == 24000 and len(audio) == 2400
+with tempfile.TemporaryDirectory() as directory:
+    reference = Path(directory) / "reference.wav"
+    reference.write_bytes(response.content)
+    waveform, input_rate = torchaudio.load(str(reference))
+    assert input_rate == 24000 and waveform.shape[-1] == 2400
+    # Triton JIT needs a working native compiler even with a prebuilt cache.
+    source = Path(directory) / "check.c"
+    source.write_text("int check(void) { return 42; }\n")
+    subprocess.run(["gcc", "-shared", "-fPIC", str(source), "-o",
+                    str(Path(directory) / "check.so")], check=True)
+subprocess.run(["ffmpeg", "-version"], check=True, stdout=subprocess.DEVNULL)
+subprocess.run(["sox", "--version"], check=True, stdout=subprocess.DEVNULL)
+subprocess.run(["ninja", "--version"], check=True, stdout=subprocess.DEVNULL)
 assert client.post("/v1/audio/speech", data={"text": " ", "ref_text": "reference"},
                    files={"ref_audio": ("ref.wav", b"x")}).status_code == 400
 assert client.post("/v1/audio/speech", data={"text": "hello", "ref_text": "reference"},

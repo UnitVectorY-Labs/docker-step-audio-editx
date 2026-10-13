@@ -26,13 +26,27 @@ is unsupported. Use an NVIDIA driver supporting CUDA 13 and NVIDIA Container
 Toolkit. Upstream recommends at least 16 GB GPU memory; GB10's unified memory
 also serves the host, so do not treat the KV cap as a total memory limit.
 
-The CUDA **devel** base is intentional: Triton/FlashInfer and PyTorch extensions
-may compile at runtime. A multi-stage build keeps Git and source checkout
-metadata out of the final image; Python packages live in `/opt/venv`, without
-`--break-system-packages`. CUDA math libraries and necessary vLLM dependencies
-are still substantial. Only FlashInfer's SM121a JIT cache is preinstalled rather
-than every GPU architecture's cache. Other GPUs may JIT-compile into writable
-cache storage. GPU ONNX support is mandatory and never replaced with CPU ONNX.
+The final image uses Google's actual **`gcr.io/distroless/cc-debian13:nonroot`**
+base, not an Ubuntu image relabeled as Distroless. A CUDA 13.4.2 Ubuntu builder
+supplies CPython 3.12 and selected audio/JIT dependencies; its toolkit and
+package manager are not copied. Debian 13's newer glibc supports the copied
+Ubuntu 24.04 interpreter ABI. Python packages live in `/opt/venv`, without
+`--break-system-packages`; pip, apt, Git and checkout metadata are absent.
+
+**Distroless tradeoff:** this is a Distroless-**derived** runtime, not a fully
+shell-free/compiler-free image. Triton compiles its CUDA driver launcher with
+a C compiler at runtime, even when attention kernels are cached. FlashInfer
+and PyTorch extension fallback compilation uses Ninja, GCC/C++, NVCC and
+`/bin/sh`. These specific tools and headers are deliberately retained rather
+than silently disabling GPU paths. CUDA libraries and NVCC come from the
+CUDA 13 Python wheels, not the builder's CUDA 13.4 toolkit. The final-runtime
+CPU check compiles a native shared object and tests TorchCodec WAV decoding,
+FFmpeg, SoX and Ninja in addition to the imports/API checks.
+
+CUDA math libraries and necessary vLLM dependencies remain substantial. Only
+SM121a (ARM64 GB10) / SM120f (AMD64 Blackwell) JIT caches are preinstalled,
+rather than every GPU architecture's cache. Other GPUs may JIT-compile into
+writable storage. GPU ONNX support is mandatory, never replaced with CPU ONNX.
 
 ## External models: complete directory trees
 
@@ -147,11 +161,29 @@ optional inference packages necessary; imports are tested during the build.
 Org project, repository indexer, Semgrep and zizmor workflows follow the shared
 UnitVectorY-Labs conventions; their org runners/secrets must be available.
 
-**GHCR visibility:** first publication defaults to private even for a public
-repository. A package administrator must use Package settings → Change
-visibility → Public. The current CLI lacks package scopes; no authentication
-scopes are changed by this project. Until visibility is changed, anonymous pull
-may fail. Repository source labels do not make packages public automatically.
+**GHCR access:** verify anonymous access after publication rather than assuming
+visibility from the public source repository. If access is denied, a package
+administrator can use Package settings → Change visibility → Public. No CLI
+authentication scopes are changed by this project.
+
+### Dependabot compatibility review
+
+The initial PRs were reviewed individually and their applicable changes are
+incorporated: CUDA builder 13.4.2, setup-uv 10.3.0, CodeQL SARIF action 4.38.3,
+explicit CUDA 13 local versions for Torch/audio/vision/codec, Diffusers 0.38.0
+security fixes, and NumPy upgraded to 2.4.6 (the newest compatible 2.4 release).
+vLLM's latest release is still 0.31.0 and explicitly requires Torch 2.13.0,
+torchaudio 2.11.0, torchvision 0.28.0, FlashInfer 0.7.0.post1 and Numba 0.65.0.
+Therefore proposed Torch 2.14.1 / torchvision 0.29.1 / FlashInfer 0.7.1 cannot
+be combined with it. Numba requires NumPy <2.5, so proposed NumPy 2.5.2 cannot
+be installed either. These are upstream dependency constraints, not blanket
+Dependabot ignores. Python updates are grouped for coordinated review.
+
+NVIDIA's cuSPARSELt 0.8.1 ARM wheel declares the nonstandard
+`py3-none-manylinux2014_sbsa` tag. The dependency check permits **only** that
+exact aarch64 tag warning; all dependency conflicts remain fatal. Final-image
+Torch imports and ELF linking are checked. This is a packaging-tag workaround,
+not evidence of GPU inference validation.
 
 ## Licenses and responsible use
 

@@ -1,3 +1,4 @@
 # Only GB10's SM121a cache: avoid the meta-package's caches for every GPU.
 --index-url https://flashinfer.ai/whl/cu130
-flashinfer-jit-cache-sm121a==0.7.0.post1
+flashinfer-jit-cache-sm121a==0.7.0.post1+cu130; platform_machine == 'aarch64'
+flashinfer-jit-cache-sm120f==0.7.0.post1+cu130; platform_machine == 'x86_64'
