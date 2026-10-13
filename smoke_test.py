@@ -3,6 +3,7 @@ import io
 import os
 from pathlib import Path
 import subprocess
+import sysconfig
 import tempfile
 from types import SimpleNamespace
 
@@ -50,8 +51,8 @@ with tempfile.TemporaryDirectory() as directory:
     assert input_rate == 24000 and waveform.shape[-1] == 2400
     # Triton JIT needs a working native compiler even with a prebuilt cache.
     source = Path(directory) / "check.c"
-    source.write_text("int check(void) { return 42; }\n")
-    subprocess.run(["gcc", "-shared", "-fPIC", str(source), "-o",
+    source.write_text("#include <Python.h>\nint check(void) { return 42; }\n")
+    subprocess.run(["gcc", "-shared", "-fPIC", "-I" + sysconfig.get_path("include"), str(source), "-o",
                     str(Path(directory) / "check.so")], check=True)
 subprocess.run(["ffmpeg", "-version"], check=True, stdout=subprocess.DEVNULL)
 subprocess.run(["sox", "--version"], check=True, stdout=subprocess.DEVNULL)

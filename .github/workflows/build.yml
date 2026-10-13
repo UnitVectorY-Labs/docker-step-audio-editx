@@ -41,6 +41,17 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Cache dependency builder before final-runtime checks
+        if: github.event_name != 'pull_request'
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc
+        with:
+          context: .
+          target: build
+          platforms: linux/${{ matrix.arch }}
+          pull: true
+          outputs: type=cacheonly
+          cache-from: type=registry,ref=${{ env.IMAGE }}:buildcache-${{ matrix.arch }}
+          cache-to: type=registry,ref=${{ env.IMAGE }}:buildcache-${{ matrix.arch }},mode=max,image-manifest=true,oci-mediatypes=true
       - name: Build, CPU-check and publish native platform
         id: build
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc
@@ -49,6 +60,7 @@ jobs:
           platforms: linux/${{ matrix.arch }}
           pull: true
           push: ${{ github.event_name != 'pull_request' }}
+          cache-from: type=registry,ref=${{ env.IMAGE }}:buildcache-${{ matrix.arch }}
           tags: ${{ env.IMAGE }}:run-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.arch }}
           labels: |
             org.opencontainers.image.revision=${{ github.sha }}

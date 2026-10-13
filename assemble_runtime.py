@@ -74,6 +74,9 @@ for name in tools:
     copy(str(Path(path).resolve()))
     dependencies(path)
 copy("/bin/sh")  # Ninja/CUDA extension fallback invokes /bin/sh, not Bash.
+# Ubuntu's venv python3 symlink targets /usr/bin/python3 (not python3.12).
+# The standalone interpreter was copied above; preserve its public alias too.
+(ROOT / "usr/bin/python3").symlink_to("python3.12")
 
 for tree in ["/usr/lib/python3.12", "/usr/lib/gcc", "/opt/venv"]:
     for path in Path(tree).rglob("*"):
