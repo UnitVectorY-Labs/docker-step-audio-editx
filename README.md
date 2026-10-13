@@ -145,7 +145,9 @@ Provider availability in CPU checks does not prove successful GPU execution.
 
 Builds run on relevant `main` pushes, manual **Build CUDA runtime** dispatch,
 and Saturdays at **02:00 UTC**. `current` updates only after both native builds
-pass. Each run publishes `sha-<full-commit>-run-<run-id>-<attempt>`; the initial
+pass. `current-arm64` and `current-amd64` are named platform aliases, also
+updated only after both required builds pass. Each run publishes
+`sha-<full-commit>-run-<run-id>-<attempt>`; the initial
 successful source build also gets `sha-<full-commit>` without overwriting an
 existing tag. OCI metadata records this repository and its revision, upstream
 revision, and licenses. Pin a digest for reproducible deployment: scheduled
@@ -171,12 +173,14 @@ authentication scopes are changed by this project.
 The initial PRs were reviewed individually and their applicable changes are
 incorporated: CUDA builder 13.4.2, setup-uv 10.3.0, CodeQL SARIF action 4.38.3,
 explicit CUDA 13 local versions for Torch/audio/vision/codec, Diffusers 0.38.0
-security fixes, and NumPy upgraded to 2.4.6 (the newest compatible 2.4 release).
+security fixes. NumPy remains 2.3.5, the newest compatible 2.3 release: the
+actual resolver rejected 2.4.6 because vLLM's Mistral-common dependency requires
+NumPy <2.4 on Python 3.12.
 vLLM's latest release is still 0.31.0 and explicitly requires Torch 2.13.0,
 torchaudio 2.11.0, torchvision 0.28.0, FlashInfer 0.7.0.post1 and Numba 0.65.0.
 Therefore proposed Torch 2.14.1 / torchvision 0.29.1 / FlashInfer 0.7.1 cannot
-be combined with it. Numba requires NumPy <2.5, so proposed NumPy 2.5.2 cannot
-be installed either. These are upstream dependency constraints, not blanket
+be combined with it. Numba also requires NumPy <2.5, so proposed NumPy 2.5.2
+cannot be installed either. These are upstream dependency constraints, not blanket
 Dependabot ignores. Python updates are grouped for coordinated review.
 
 NVIDIA's cuSPARSELt 0.8.1 ARM wheel declares the nonstandard

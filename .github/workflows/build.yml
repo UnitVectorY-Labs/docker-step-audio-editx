@@ -88,7 +88,15 @@ jobs:
             "$IMAGE:run-${RUN_ID}-${ATTEMPT}-arm64" \
             "$IMAGE:run-${RUN_ID}-${ATTEMPT}-amd64"
           # Never silently replace an existing source-SHA tag on a rebuild.
+          for arch in arm64 amd64; do
+            docker buildx imagetools create \
+              --tag "$IMAGE:current-${arch}" \
+              --tag "$IMAGE:${immutable}-${arch}" \
+              "$IMAGE:run-${RUN_ID}-${ATTEMPT}-${arch}"
+          done
           if ! docker buildx imagetools inspect "$IMAGE:sha-${SHA}" >/dev/null 2>&1; then
             docker buildx imagetools create --tag "$IMAGE:sha-${SHA}" "$IMAGE:$immutable"
           fi
           docker buildx imagetools inspect "$IMAGE:current" >> "$GITHUB_STEP_SUMMARY"
+          docker buildx imagetools inspect "$IMAGE:current-arm64" >> "$GITHUB_STEP_SUMMARY"
+          docker buildx imagetools inspect "$IMAGE:current-amd64" >> "$GITHUB_STEP_SUMMARY"
