@@ -14,6 +14,12 @@ RUN pip install --upgrade pip setuptools wheel \
     && pip install -r /tmp/requirements/requirements.txt \
     && pip install -r /tmp/requirements/requirements-flashinfer.txt \
     && python /tmp/check_dependencies.py
+COPY patch_jit_cache_shim.py /tmp/patch_jit_cache_shim.py
+COPY requirements-shim/requirements.txt /tmp/requirements-shim.txt
+RUN pip download --no-deps -r /tmp/requirements-shim.txt -d /tmp/shim-original \
+    && python /tmp/patch_jit_cache_shim.py /tmp/shim-original/*.whl /tmp/shim-selected/$(basename /tmp/shim-original/*.whl) \
+    && pip install --no-deps /tmp/shim-selected/*.whl \
+    && python /tmp/check_dependencies.py
 ARG STEP_REF=a652e87052c109e26f616d60971376ff47a829d4
 RUN git init /opt/step-audio-editx \
     && git -C /opt/step-audio-editx remote add origin https://github.com/stepfun-ai/Step-Audio-EditX.git \

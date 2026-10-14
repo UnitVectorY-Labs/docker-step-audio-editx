@@ -47,6 +47,12 @@ CUDA math libraries and necessary vLLM dependencies remain substantial. Only
 SM121a (ARM64 GB10) / SM120f (AMD64 Blackwell) JIT caches are preinstalled,
 rather than every GPU architecture's cache. Other GPUs may JIT-compile into
 writable storage. GPU ONNX support is mandatory, never replaced with CPU ONNX.
+The upstream `flashinfer-jit-cache` discovery shim is installed as well as the
+selected binary provider. Its Python code is unchanged; its wheel dependency
+metadata and provider list are narrowed to that architecture, matching the
+documented minimal-cache installation without leaving unsatisfied requirements.
+An on-device startup test caught the missing shim; CI now asserts its version
+and discovers the actual installed provider before publication.
 
 ## External models: complete directory trees
 
@@ -160,6 +166,12 @@ FlashInfer updates as a coordinated stack; incompatible proposals should not
 be merged merely because CPU API tests pass. The upstream training `uv.lock`
 is intentionally not used. FunASR's eager registry import makes some otherwise
 optional inference packages necessary; imports are tested during the build.
+Dependabot PR #13's seven bumps were reviewed but cannot be installed with this
+vLLM baseline: vLLM 0.31 requires Torch 2.13, Torchvision 0.28 and FlashInfer
+0.7.0.post1, while Mistral-common requires NumPy below 2.4 on Python 3.12.
+The proposed Torch 2.14/Torchvision 0.29/FlashInfer 0.7.1/NumPy 2.5 updates
+conflict with those declared requirements. They are not silently forced in;
+the coordinated vLLM stack must be upgraded and GPU-validated first.
 Org project, repository indexer, Semgrep and zizmor workflows follow the shared
 UnitVectorY-Labs conventions; their org runners/secrets must be available.
 

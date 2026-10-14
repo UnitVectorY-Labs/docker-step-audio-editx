@@ -1,5 +1,6 @@
 """Real imports plus model-free API checks; deliberately does not run lifespan."""
 import io
+from importlib.metadata import version
 import os
 from pathlib import Path
 import subprocess
@@ -12,6 +13,7 @@ import onnxruntime
 import soundfile as sf
 import torch
 import torchaudio
+import flashinfer_jit_cache
 from fastapi.testclient import TestClient
 
 import server
@@ -22,6 +24,10 @@ from vllm.model_executor.models import ModelRegistry
 
 assert not torch.cuda.is_available(), "Build checks must not use a GPU"
 assert "CUDAExecutionProvider" in onnxruntime.get_available_providers()
+assert flashinfer_jit_cache.__version__.split("+")[0] == version("flashinfer-python")
+providers = flashinfer_jit_cache.get_jit_cache_providers()
+assert len(providers) == 1 and providers[0].jit_cache_dir.is_dir(), "Missing selected JIT-cache provider"
+assert providers[0].version == flashinfer_jit_cache.__version__
 assert os.access(os.environ["HOME"], os.W_OK)
 assert server.KV_CACHE_MEMORY_BYTES == 4294967296
 assert "Step1ForCausalLM" in ModelRegistry.get_supported_archs()
