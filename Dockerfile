@@ -57,6 +57,9 @@ COPY --from=build /opt/step-audio-editx /opt/step-audio-editx
 COPY --from=build --chown=1000:1000 /runtime-home/ /home/step/
 WORKDIR /opt/step-audio-editx
 COPY server.py entrypoint.py smoke_test.py ./
+USER 0:0
+# Generate against the final Google-based filesystem, not Ubuntu builder paths.
+RUN --network=none ["/usr/sbin/ldconfig"]
 USER 1000:1000
 # Tests execute in the FINAL Google-based runtime, not the builder or old image.
 RUN --network=none ["/opt/venv/bin/python", "smoke_test.py"]
