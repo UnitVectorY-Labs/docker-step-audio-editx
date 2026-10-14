@@ -71,10 +71,18 @@ for name in tools:
     path = shutil.which(name)
     if path is None:
         raise RuntimeError(f"Missing required runtime tool: {name}")
+    if name == "ldconfig" and Path(path + ".real").is_file():
+        # Ubuntu's public command is a dpkg-trigger shell wrapper. Triton needs
+        # only the native cache-query binary, not a package-manager entrypoint.
+        path += ".real"
     # Preserve real names too: GCC selects cc1 by executable installation path.
     copy(path)
     copy(str(Path(path).resolve()))
     dependencies(path)
+    if name == "ldconfig":
+        target = ROOT / "usr/sbin/ldconfig"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(path, target, follow_symlinks=True)
 copy("/bin/sh")  # Ninja/CUDA extension fallback invokes /bin/sh, not Bash.
 # Ubuntu's venv python3 symlink targets /usr/bin/python3 (not python3.12).
 # The standalone interpreter was copied above; preserve its public alias too.
