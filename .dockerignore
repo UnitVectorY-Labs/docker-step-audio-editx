@@ -6,3 +6,6 @@
 !smoke_test.py
 !assemble_runtime.py
 !check_dependencies.py
+!patch_jit_cache_shim.py
+!requirements-shim/
+!requirements-shim/requirements.txt

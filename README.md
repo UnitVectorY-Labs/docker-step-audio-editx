@@ -36,7 +36,7 @@ Ubuntu 24.04 interpreter ABI. Python packages live in `/opt/venv`, without
 **Distroless tradeoff:** this is a Distroless-**derived** runtime, not a fully
 shell-free/compiler-free image. Triton compiles its CUDA driver launcher with
 a C compiler at runtime, even when attention kernels are cached. FlashInfer
-and PyTorch extension fallback compilation uses Ninja, GCC/C++, NVCC and
+and PyTorch extension fallback compilation uses Ninja, GCC/C++, NVCC, ldconfig and
 `/bin/sh`. These specific tools and headers are deliberately retained rather
 than silently disabling GPU paths. CUDA libraries and NVCC come from the
 CUDA 13 Python wheels, not the builder's CUDA 13.4 toolkit. The final-runtime

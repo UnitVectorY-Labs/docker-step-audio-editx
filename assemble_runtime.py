@@ -66,7 +66,7 @@ for pattern in ["/usr/lib/*/libpython3.12.so*", "/usr/lib/*/libsox.so*",
 
 tools = ["python3.12", "gcc", "g++", "cc", "c++", "as", "ld", "ar", "ranlib",
          "nm", "objdump", "objcopy", "strip", "readelf", "ffmpeg", "ffprobe",
-         "sox", "env", "uname"]
+          "sox", "env", "uname", "ldconfig"]
 for name in tools:
     path = shutil.which(name)
     if path is None:

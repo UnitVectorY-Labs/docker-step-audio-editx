@@ -63,6 +63,7 @@ with tempfile.TemporaryDirectory() as directory:
 subprocess.run(["ffmpeg", "-version"], check=True, stdout=subprocess.DEVNULL)
 subprocess.run(["sox", "--version"], check=True, stdout=subprocess.DEVNULL)
 subprocess.run(["ninja", "--version"], check=True, stdout=subprocess.DEVNULL)
+subprocess.run(["/sbin/ldconfig", "-p"], check=True, stdout=subprocess.DEVNULL)
 assert client.post("/v1/audio/speech", data={"text": " ", "ref_text": "reference"},
                    files={"ref_audio": ("ref.wav", b"x")}).status_code == 400
 assert client.post("/v1/audio/speech", data={"text": "hello", "ref_text": "reference"},
