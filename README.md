@@ -20,11 +20,27 @@ These are **CPU checks, not GPU inference tests**.
 
 The dependency baseline was inspected from the existing GB10 ARM64 image:
 vLLM 0.31.0, PyTorch 2.13.0+cu130, torchaudio 2.11.0+cu130, Transformers 5.12.1,
-FlashInfer 0.7.0.post1, GPU ONNX Runtime 1.31.0. The replacement has not yet been
-validated on a GB10 GPU; AMD64 GPU inference is also untested. CPU-only inference
+FlashInfer 0.7.0.post1, GPU ONNX Runtime 1.31.0. The replacement passed the
+GB10 GPU tests below; AMD64 GPU inference is untested. CPU-only inference
 is unsupported. Use an NVIDIA driver supporting CUDA 13 and NVIDIA Container
 Toolkit. Upstream recommends at least 16 GB GPU memory; GB10's unified memory
 also serves the host, so do not treat the KV cap as a total memory limit.
+
+On **2026-10-14 UTC**, published multiarch manifest
+`sha256:6998c10eec21ee1497ceed200b7b5264413dbac4f625341c97da385502b902a1`
+(source `0bb38e3d095253ced44d2c4d8568995214024423`,
+[build 38546053585](https://github.com/UnitVectorY-Labs/docker-step-audio-editx/actions/runs/38546053585))
+passed isolated ARM64 GB10 inference with read-only external model/tokenizer
+mounts, writable cache, and Hugging Face offline mode. Health and reference
+cloning returned HTTP 200 with non-silent mono PCM16 WAV at 24 kHz (1.32 s).
+Missing text/transcript/reference returned 422; blank text/empty reference
+returned 400. Standalone shutdown exited 0 without OOM and memory recovered.
+
+The same image then passed llama-swap synthesis and invalid-input checks,
+individual unload, sequential Breeze → Fish → Step switching, exit 0 and host
+memory recovery. Actual container image IDs matched standalone validation.
+TTS/LLM co-loading and AMD64 GPU inference remain unverified. Retest new image
+revisions; CI's model-free CPU checks alone do not establish GPU inference.
 
 The final image uses Google's actual **`gcr.io/distroless/cc-debian13:nonroot`**
 base, not an Ubuntu image relabeled as Distroless. A CUDA 13.4.2 Ubuntu builder
