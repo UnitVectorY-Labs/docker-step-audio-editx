@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # Builder only: the published image is Google's genuine Distroless CC base.
-FROM nvidia/cuda:13.4.2-devel-ubuntu24.04 AS build
+FROM nvidia/cuda:13.4.3-devel-ubuntu24.04 AS build
 ENV DEBIAN_FRONTEND=noninteractive PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 \
     PATH=/opt/venv/bin:$PATH
 RUN apt-get update && apt-get install -y --no-install-recommends \
