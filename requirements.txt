@@ -2,13 +2,13 @@
 --extra-index-url https://download.pytorch.org/whl/cu130
 --extra-index-url https://flashinfer.ai/whl
 vllm==0.31.0
-torch==2.13.0+cu130
+torch==2.14.1+cu130
 torchaudio==2.11.0+cu130
-torchvision==0.28.0+cu130
+torchvision==0.29.1+cu130
 torchcodec==0.17.0+cu130
 transformers==5.12.1
-flashinfer-python==0.7.0.post1
-flashinfer-cubin==0.7.0.post1
+flashinfer-python==0.7.2.post1
+flashinfer-cubin==0.7.2.post1
 funasr==1.4.16
 onnxruntime-gpu==1.31.0
 openai-whisper==20250625
@@ -23,7 +23,7 @@ sox==1.5.0
 soundfile==0.13.1
 librosa==1.0.0
 # Mistral-common (required by vLLM) requires numpy<2.4 on Python 3.12.
-numpy==2.3.5
+numpy==2.5.4
 diffusers==0.38.0
 omegaconf==2.3.1
 modelscope==1.39.1
